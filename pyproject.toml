@@ -16,6 +16,22 @@ dependencies = [
     "matplotlib",
 ]
 
+[project.optional-dependencies]
+physicsnemo = [
+    # "nvidia-physicsnemo[launch,dev,makani,fignet,storage,shardtensor,natten] @ git+https://github.com/NVIDIA/physicsnemo.git@main",
+    # Subset supported on mac OS
+    "nvidia-physicsnemo[launch,makani,storage,shardtensor] @ git+https://github.com/NVIDIA/physicsnemo.git@main",
+]
+the_well = [
+    "the-well[dev,benchmark] @ git+https://github.com/PolymathicAI/the_well.git@a123419",
+]
+
 [build-system]
 requires = ["uv_build>=0.8.15,<0.9.0"]
 build-backend = "uv_build"
+
+[tool.uv]
+# Handling for triton dependency
+override-dependencies = [
+    "triton @ git+https://github.com/openai/triton.git@v3.5.0",
+]
