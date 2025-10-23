@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from constants import EPSILON, DEFAULT_LP_NORM_ORDER, DEFAULT_SPATIAL_DIM
+from spatio_temporal_forecasting.constants import EPSILON, DEFAULT_LP_NORM_ORDER, DEFAULT_SPATIAL_DIM
 
 
 class Loss(nn.Module):

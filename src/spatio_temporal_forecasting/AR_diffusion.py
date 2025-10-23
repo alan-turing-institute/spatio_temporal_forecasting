@@ -3,8 +3,8 @@
 import torch
 from typing import Optional
 
-from AutoregressiveBase import AutoregressiveBase
-from diffusion_emulator import SpatialDiffusionModel
+from spatio_temporal_forecasting.AutoregressiveBase import AutoregressiveBase
+from spatio_temporal_forecasting.diffusion_emulator import SpatialDiffusionModel
 
 
 class AutoregressiveDiffusion(AutoregressiveBase):

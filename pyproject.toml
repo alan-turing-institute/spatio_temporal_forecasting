@@ -1,0 +1,21 @@
+[project]
+name = "spatio-temporal-forecasting"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = []
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "neuraloperator",
+    "torch>=2.2.0,<3.0.0",
+    "autoemulate",
+    "denoising-diffusion-pytorch",
+    "ipykernel",
+    "einops",
+    "tqdm",
+    "matplotlib",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"

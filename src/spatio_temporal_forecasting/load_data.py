@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 from autoemulate.experimental.data.spatiotemporal_dataset import AutoEmulateDataset
 
-from constants import (
+from spatio_temporal_forecasting.constants import (
     DEFAULT_BATCH_SIZE,
     DEFAULT_LEARNING_RATE,
     DEFAULT_WEIGHT_DECAY,

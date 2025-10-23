@@ -35,15 +35,15 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
-from fno_emulator import MultivariableFNO
-from AR_FNO import AutoregressiveFNO
-from loss import Loss
-from make_gif import visualize_predictions, plot_gif, create_gif_visualization, create_long_term_predictions
+from spatio_temporal_forecasting.fno_emulator import MultivariableFNO
+from spatio_temporal_forecasting.AR_FNO import AutoregressiveFNO
+from spatio_temporal_forecasting.loss import Loss
+from spatio_temporal_forecasting.make_gif import visualize_predictions, plot_gif, create_gif_visualization, create_long_term_predictions
 
-from load_checkpoint import load_last_checkpoint
-from loss import plot_loss_with_components, plot_loss_weights_evolution
-from load_data import parse_args, set_seed, parse_tf_schedule, load_data, compute_normalization_stats
-from constants import DEFAULT_GRID_SIZE, PRINT_FREQ_BATCHES, CHECKPOINT_KEYS, EPSILON
+from spatio_temporal_forecasting.load_checkpoint import load_last_checkpoint
+from spatio_temporal_forecasting.loss import plot_loss_with_components, plot_loss_weights_evolution
+from spatio_temporal_forecasting.load_data import parse_args, set_seed, parse_tf_schedule, load_data, compute_normalization_stats
+from spatio_temporal_forecasting.constants import DEFAULT_GRID_SIZE, PRINT_FREQ_BATCHES, CHECKPOINT_KEYS, EPSILON
 
 
 def create_model(args: argparse.Namespace, device: torch.device) -> AutoregressiveFNO:

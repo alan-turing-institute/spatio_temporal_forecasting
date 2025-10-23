@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 
-from constants import CHECKPOINT_EXTENSION, CHECKPOINT_EXTENSION_ALT, CHECKPOINT_KEYS
+from spatio_temporal_forecasting.constants import CHECKPOINT_EXTENSION, CHECKPOINT_EXTENSION_ALT, CHECKPOINT_KEYS
 
 
 def load_last_checkpoint(

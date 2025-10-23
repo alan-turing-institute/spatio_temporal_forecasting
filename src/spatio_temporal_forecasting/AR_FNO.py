@@ -5,8 +5,8 @@ import torch.nn as nn
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from fno_emulator import MultivariableFNO
-from AutoregressiveBase import AutoregressiveBase
+from spatio_temporal_forecasting.fno_emulator import MultivariableFNO
+from spatio_temporal_forecasting.AutoregressiveBase import AutoregressiveBase
 
 
 class AutoregressiveFNO(AutoregressiveBase):
