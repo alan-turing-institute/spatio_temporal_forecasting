@@ -9,7 +9,22 @@ from spatio_temporal_forecasting.fno_emulator import MultivariableFNO
 from spatio_temporal_forecasting.AutoregressiveBase import AutoregressiveBase
 
 
-class AutoregressiveFNO(AutoregressiveBase):
+from dataclasses import dataclass
+from physicsnemo.models.meta import ModelMetaData
+from physicsnemo.models.module import Module
+
+
+@dataclass
+class AutoregressiveFNOMetaData(ModelMetaData):
+    name: str = "AutoregressiveFNO"
+    # Optimization
+    jit: bool = False
+    cuda_graphs: bool = True
+    amp_cpu: bool = True
+    amp_gpu: bool = True
+
+
+class AutoregressiveFNO(AutoregressiveBase, Module):
     """
     Autoregressive wrapper for FNO that handles temporal evolution.
     
@@ -33,6 +48,7 @@ class AutoregressiveFNO(AutoregressiveBase):
             step_size: Number of timesteps to predict in each forward pass
             teacher_forcing_ratio: Ratio of teacher forcing during training
         """
+        Module.__init__(self, meta=AutoregressiveFNOMetaData())
         # Initialize base class with FNO's n_vars
         super().__init__(
             n_vars=fno_model.n_vars,
