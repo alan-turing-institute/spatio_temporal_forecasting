@@ -30,8 +30,8 @@ the_well = [
 requires = ["uv_build>=0.8.15,<0.9.0"]
 build-backend = "uv_build"
 
-[tool.uv]
-# Handling for triton dependency
-override-dependencies = [
-    "triton @ git+https://github.com/openai/triton.git@v3.5.0",
-]
+# [tool.uv]
+# # Handling for triton dependency
+# override-dependencies = [
+#     "triton @ git+https://github.com/openai/triton.git@v3.5.0",
+# ]

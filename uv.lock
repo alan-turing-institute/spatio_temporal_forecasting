@@ -8,9 +8,6 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform != 'linux'",
 ]
 
-[manifest]
-overrides = [{ name = "triton", git = "https://github.com/openai/triton.git?rev=v3.5.0" }]
-
 [[package]]
 name = "accelerate"
 version = "1.11.0"
@@ -3499,7 +3496,7 @@ dependencies = [
     { name = "nvidia-nvtx-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "setuptools", marker = "python_full_version >= '3.12'" },
     { name = "sympy" },
-    { name = "triton" },
+    { name = "triton", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "typing-extensions" },
 ]
 wheels = [
@@ -3646,8 +3643,14 @@ wheels = [
 
 [[package]]
 name = "triton"
-version = "3.5.0+gitc3c476f3"
-source = { git = "https://github.com/openai/triton.git?rev=v3.5.0#c3c476f357f1e9768ea4e45aa5c17528449ab9ef" }
+version = "3.5.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/f9/b6f60f978397c616fd8dacca2305759fe4f80d397b20ef72534803244bd5/triton-3.5.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8457b22148defefdcb7fa8144b05ce211b9faefad650a1ce85b23df488d5549c", size = 159926731, upload-time = "2025-10-15T19:15:49.682Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/78/949a04391c21956c816523678f0e5fa308eb5b1e7622d88c4e4ef5fceca0/triton-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f34bfa21c5b3a203c0f0eab28dcc1e49bd1f67d22724e77fb6665a659200a4ec", size = 170433488, upload-time = "2025-10-13T16:37:57.132Z" },
+    { url = "https://files.pythonhosted.org/packages/87/9b/30988039e1e84df7554fba24e6a734d2d0e847af33cabdf9b532b3c51456/triton-3.5.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:7da21fccceafc163e3a5e857abe34351ef76345af06cabf9637a914742671f0b", size = 159946647, upload-time = "2025-10-15T19:15:56.325Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/3a/e991574f3102147b642e49637e0281e9bb7c4ba254edb2bab78247c85e01/triton-3.5.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c9e71db82261c4ffa3921cd050cd5faa18322d2d405c30eb56084afaff3b0833", size = 170476535, upload-time = "2025-10-13T16:38:05.18Z" },
+]
 
 [[package]]
 name = "typing-extensions"
