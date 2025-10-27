@@ -1,0 +1,3 @@
+epochs: 20
+learning_rate: 0.01
+lr_decay: 0.85

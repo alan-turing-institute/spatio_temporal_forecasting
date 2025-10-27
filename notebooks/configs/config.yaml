@@ -1,0 +1,13 @@
+defaults:
+  - model: fno
+  - training: default
+
+dataset:
+  name: turbulent_radiative_layer_2D
+  n_steps_input: 4
+  n_steps_output: 1
+  batch_size: 4
+  n_channels: 1
+
+device: cuda
+output_path: ${dataset.name}_fno_physicsnemo
