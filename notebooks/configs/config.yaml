@@ -1,6 +1,7 @@
 defaults:
   - model: fno
   - training: default
+  - _self_
 
 dataset:
   name: turbulent_radiative_layer_2D
