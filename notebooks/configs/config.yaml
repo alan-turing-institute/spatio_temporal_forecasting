@@ -1,4 +1,5 @@
 defaults:
+  - config_schema
   - model: fno
   - training: default
   - _self_
