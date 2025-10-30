@@ -25,7 +25,238 @@ AutoregressiveBase (Abstract)
 - **`MultivariableFNO`**: FNO implementation for multi-variable spatial fields
 - **`SpatialDiffusionModel`**: Diffusion model for spatial field generation
 
+---
 
+## Loss Functions
+
+<details>
+<summary><b>📐 Mathematical Formulation (Click to expand)</b></summary>
+
+The loss module combines two key components for spatiotemporal prediction accuracy and physical consistency.
+
+### Total Loss
+
+$$\mathcal{L}_{\text{total}} = w_1 \cdot \mathcal{L}_{\text{relative}} + w_2 \cdot \mathcal{L}_{\text{temporal}}$$
+
+### 1. Relative $L^p$ Loss
+
+Measures the relative error between predictions and targets in $L^p$ norm:
+
+$$\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon}$$
+
+**Where:**
+- $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
+- $\text{target}$: Ground truth tensor (same shape as pred)
+- $p$: Order of $L^p$ norm (default: 2 for $L^2$/Euclidean norm)
+- $\epsilon$: Small constant to prevent division by zero
+- $\|\cdot\|_p$: $L^p$ norm computed over all dimensions except batch
+- $B$: Batch size
+
+**Properties:**
+- Scale-invariant (relative error)
+- Normalized by target magnitude
+- Averaged over batch dimension
+
+### 2. Temporal Consistency Loss
+
+Penalizes inconsistent temporal derivatives between consecutive timesteps:
+
+$$\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}$$
+
+**Where:**
+- $\Delta\text{pred}_{i,t} = \text{pred}_{i,t+1} - \text{pred}_{i,t}$ (temporal finite differences)
+- $\Delta\text{target}_{i,t} = \text{target}_{i,t+1} - \text{target}_{i,t}$
+- $T$: Number of timesteps
+- Returns 0 if only 1 timestep present
+
+**Properties:**
+- Enforces smooth temporal evolution
+- Helps maintain physical consistency over time
+- Improves long-term rollout stability
+
+### 3. Loss Weights
+
+Two modes for weight configuration:
+
+#### Fixed Weights (default: `learnable=False`)
+
+$$w_1 = 1.0 \quad \text{(fixed)}$$
+$$w_2 = \alpha_{\text{temporal}} \quad \text{(default: 0.5, user-specified)}$$
+
+#### Learnable Weights (`learnable=True`)
+
+$$w_1 = \exp(\theta_1)$$
+$$w_2 = \exp(\theta_2)$$
+
+- $\theta_1, \theta_2$: Learnable parameters initialized as $[1.0, \alpha_{\text{temporal}}]$
+- Uses exponential to ensure positive weights
+- Allows automatic balance between loss components during training
+
+</details>
+
+<details>
+<summary><b>💻 Usage Examples (Click to expand)</b></summary>
+
+### Basic Usage
+
+```python
+from loss import Loss
+
+# Create loss function
+criterion = Loss(
+    d=2,                    # Spatial dimension
+    p=2,                    # L2 norm
+    alpha_temporal=0.5,     # Weight for temporal loss
+    learnable=False         # Fixed weights
+)
+
+# During training
+pred = model(input)         # [B, T, n_vars, H, W]
+target = ...                # [B, T, n_vars, H, W]
+
+loss = criterion(pred, target)
+loss.backward()
+```
+
+### With Learnable Weights
+
+```python
+# Create loss with learnable weights
+criterion = Loss(
+    d=2,
+    p=2,
+    alpha_temporal=0.5,
+    learnable=True
+)
+
+# Add loss parameters to optimizer
+optimizer = torch.optim.Adam([
+    {'params': model.parameters()},
+    {'params': criterion.parameters(), 'lr': 0.01}
+])
+```
+
+### Monitoring Loss Components
+
+```python
+# Get individual loss components for logging
+components = criterion.get_loss_components(pred, target)
+
+print(f"Relative Lp Loss: {components['relative_lp']:.6f}")
+print(f"Temporal Loss: {components['temporal_consistency']:.6f}")
+print(f"Weight (Relative): {components['weight_rel']:.6f}")
+print(f"Weight (Temporal): {components['weight_temp']:.6f}")
+```
+
+</details>
+
+<details>
+<summary><b>📊 Visualization Tools (Click to expand)</b></summary>
+
+The module includes comprehensive visualization functions for tracking training progress.
+
+### 1. Simple Loss Plot
+
+```python
+from loss import plot_loss
+
+plot_loss(train_losses, val_losses)
+# Saves to: loss_history.png
+```
+
+### 2. Detailed Loss Plot with Components
+
+```python
+from loss import plot_loss_with_components
+
+plot_loss_with_components(
+    train_losses=train_losses,
+    val_losses=val_losses,
+    train_components=train_components,
+    val_components=val_components,
+    save_path='./results'
+)
+# Saves to: ./results/loss_history.png
+```
+
+**Includes 6 subplots:**
+1. Total loss (train & val) with best model marker
+2. Relative Lp loss component
+3. Temporal consistency component
+4. Ratio of temporal/relative loss
+5. Log-scale total loss
+6. Stacked area plot showing component contributions
+
+### 3. Loss Weights Evolution
+
+```python
+from loss import plot_loss_weights_evolution
+
+plot_loss_weights_evolution(
+    loss_weights_history=weights_history,
+    save_path='./results'
+)
+# Saves to: ./results/loss_weights_history.png
+```
+
+</details>
+
+<details>
+<summary><b>⚙️ Parameters & Configuration (Click to expand)</b></summary>
+
+### Loss Constructor Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `d` | int | 2 | Spatial dimension |
+| `p` | int | 2 | Order of Lp norm (2 = L2/Euclidean norm) |
+| `alpha_temporal` | float | 0.5 | Weight for temporal consistency loss |
+| `learnable` | bool | False | Whether loss weights are learnable parameters |
+
+### Input Tensor Shapes
+
+The loss functions accept flexible input shapes:
+
+- **Spatiotemporal**: `[B, T, n_vars, H, W]` - Full spatiotemporal data
+- **Spatial only**: `[B, n_vars, H, W]` - Single timestep (temporal loss = 0)
+- **Generic**: `[B, ...]` - Any shape with batch dimension first
+
+</details>
+
+<details>
+<summary><b>💡 Tips & Best Practices (Click to expand)</b></summary>
+
+### Design Considerations
+
+**Why Relative Loss?**
+- Provides scale-invariance across variables with different magnitudes
+- Essential for multi-variable predictions (e.g., temperature, pressure, velocity)
+- Enables fair comparison across different physical quantities
+
+**Why Temporal Consistency?**
+- Prevents unphysical temporal oscillations
+- Enforces smooth evolution (important for PDEs)
+- Improves long-term rollout stability
+- Maintains physical realism in predictions
+
+### Hyperparameter Tuning
+
+1. **Starting `alpha_temporal`**: Begin with 0.5, adjust based on validation performance
+2. **Learnable weights**: Use smaller learning rate (0.01-0.001) for loss parameters
+3. **Long rollouts**: Increase `alpha_temporal` for longer prediction horizons
+4. **Unstable training**: If temporal loss dominates, reduce `alpha_temporal`
+
+### Common Issues
+
+| Issue | Possible Cause | Solution |
+|-------|----------------|----------|
+| Temporal loss → 0 | Weight too small | Increase `alpha_temporal` |
+| Unstable predictions | Temporal loss too dominant | Decrease `alpha_temporal` |
+| Oscillating predictions | Insufficient temporal regularization | Increase `alpha_temporal` |
+
+</details>
+
+---
 
 ## Quick Start
 
@@ -297,4 +528,3 @@ results/
 - Reduce `hidden_channels`
 - Reduce `n_layers`
 - Use gradient checkpointing
-
