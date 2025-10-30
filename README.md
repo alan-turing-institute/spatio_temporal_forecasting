@@ -36,17 +36,17 @@ The loss module combines two key components for spatiotemporal prediction accura
 
 ### Total Loss
 
-$$
+$
 \mathcal{L}_{\text{total}} = w_1 \cdot \mathcal{L}_{\text{relative}} + w_2 \cdot \mathcal{L}_{\text{temporal}}
-$$
+$
 
 ### 1. Relative $L^p$ Loss
 
 Measures the relative error between predictions and targets in $L^p$ norm:
 
-$$
+$
 \mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon}
-$$
+$
 
 **Where:**
 - $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
@@ -65,9 +65,9 @@ $$
 
 Penalizes inconsistent temporal derivatives between consecutive timesteps:
 
-$$
+$
 \mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}
-$$
+$
 
 **Where:**
 - $\Delta\text{pred}_{i,t} = \text{pred}_{i,t+1} - \text{pred}_{i,t}$ (temporal finite differences)
