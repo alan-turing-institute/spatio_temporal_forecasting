@@ -44,7 +44,9 @@ $$
 
 Measures the relative error between predictions and targets in $L^p$ norm:
 
-$$\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon}$$
+$$
+\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon}
+$$
 
 **Where:**
 - $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
@@ -63,7 +65,9 @@ $$\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}
 
 Penalizes inconsistent temporal derivatives between consecutive timesteps:
 
-$\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}$
+$$
+\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}
+$$
 
 **Where:**
 - $\Delta\text{pred}_{i,t} = \text{pred}_{i,t+1} - \text{pred}_{i,t}$ (temporal finite differences)
@@ -88,8 +92,9 @@ $w_2 = \alpha_{\text{temporal}} \quad \text{(default: 0.5, user-specified)}$
 
 #### Learnable Weights (`learnable=True`)
 
-$$w_1 = \exp(\theta_1)$$
-$$w_2 = \exp(\theta_2)$$
+$w_1 = \exp(\theta_1)$
+
+$w_2 = \exp(\theta_2)$
 
 - $\theta_1, \theta_2$: Learnable parameters initialized as $[1.0, \alpha_{\text{temporal}}]$
 - Uses exponential to ensure positive weights
