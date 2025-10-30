@@ -25,7 +25,196 @@ AutoregressiveBase (Abstract)
 - **`MultivariableFNO`**: FNO implementation for multi-variable spatial fields
 - **`SpatialDiffusionModel`**: Diffusion model for spatial field generation
 
+---
 
+## Loss Functions
+
+<details>
+<summary><b>📐 Mathematical Formulation (Click to expand)</b></summary>
+
+The loss module combines two key components for spatiotemporal prediction accuracy and physical consistency.
+
+### Total Loss
+
+![Total Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{total}}=w_1\cdot\mathcal{L}_{\text{relative}}+w_2\cdot\mathcal{L}_{\text{temporal}})
+
+
+### 1. Relative $L^p$ Loss
+
+Measures the relative error between predictions and targets in $L^p$ norm:
+
+![Relative Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{relative}}=\frac{1}{B}\sum_{i=1}^{B}\frac{\|\text{pred}_i-\text{target}_i\|_p}{\|\text{target}_i\|_p+\epsilon})
+
+**Where:**
+- $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
+- $\text{target}$: Ground truth tensor (same shape as pred)
+- $p$: Order of $L^p$ norm (default: 2 for $L^2$/Euclidean norm)
+- $\epsilon$: Small constant to prevent division by zero
+- $\|\cdot\|_p$: $L^p$ norm computed over all dimensions except batch
+- $B$: Batch size
+
+**Properties:**
+- Scale-invariant (relative error)
+- Normalized by target magnitude
+- Averaged over batch dimension
+
+### 2. Temporal Consistency Loss
+
+Penalizes inconsistent temporal derivatives between consecutive timesteps:
+
+![Temporal Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{temporal}}=\frac{1}{B(T-1)}\sum_{i=1}^{B}\sum_{t=1}^{T-1}\frac{\|\Delta\text{pred}_{i,t}-\Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p+\epsilon})
+
+**Where:**
+- ![Delta pred](https://latex.codecogs.com/svg.latex?\Delta\text{pred}_{i,t}=\text{pred}_{i,t+1}-\text{pred}_{i,t}) (temporal finite differences)
+- ![Delta target](https://latex.codecogs.com/svg.latex?\Delta\text{target}_{i,t}=\text{target}_{i,t+1}-\text{target}_{i,t})
+- ![T](https://latex.codecogs.com/svg.latex?T): Number of timesteps
+- Returns 0 if only 1 timestep present
+  
+**Properties:**
+- Enforces smooth temporal evolution
+- Helps maintain physical consistency over time
+- Improves long-term rollout stability
+
+### 3. Loss Weights
+
+Two modes for weight configuration:
+
+#### Fixed Weights (default: `learnable=False`)
+
+$w_1 = 1.0 \quad \text{(fixed)}$
+
+$w_2 = \alpha_{\text{temporal}} \quad \text{(default: 0.5, user-specified)}$
+
+#### Learnable Weights (`learnable=True`)
+
+$w_1 = \exp(\theta_1)$
+
+$w_2 = \exp(\theta_2)$
+
+- $\theta_1, \theta_2$: Learnable parameters initialized as $[1.0, \alpha_{\text{temporal}}]$
+- Uses exponential to ensure positive weights
+- Allows automatic balance between loss components during training
+
+</details>
+
+<details>
+<summary><b>💻 Usage Examples (Click to expand)</b></summary>
+
+### Basic Usage
+
+```python
+from loss import Loss
+
+# Create loss function
+criterion = Loss(
+    d=2,                    # Spatial dimension
+    p=2,                    # L2 norm
+    alpha_temporal=0.5,     # Weight for temporal loss
+    learnable=False         # Fixed weights
+)
+
+# During training
+pred = model(input)         # [B, T, n_vars, H, W]
+target = ...                # [B, T, n_vars, H, W]
+
+loss = criterion(pred, target)
+loss.backward()
+```
+
+### With Learnable Weights
+
+```python
+# Create loss with learnable weights
+criterion = Loss(
+    d=2,
+    p=2,
+    alpha_temporal=0.5,
+    learnable=True
+)
+
+# Add loss parameters to optimizer
+optimizer = torch.optim.Adam([
+    {'params': model.parameters()},
+    {'params': criterion.parameters(), 'lr': 0.01}
+])
+```
+
+</details>
+
+<details>
+<summary><b>📊 Visualization Tools (Click to expand)</b></summary>
+
+The module includes comprehensive visualization functions for tracking training progress.
+
+### 1. Simple Loss Plot
+
+```python
+from loss import plot_loss
+
+plot_loss(train_losses, val_losses)
+# Saves to: loss_history.png
+```
+
+### 2. Detailed Loss Plot with Components
+
+```python
+from loss import plot_loss_with_components
+
+plot_loss_with_components(
+    train_losses=train_losses,
+    val_losses=val_losses,
+    train_components=train_components,
+    val_components=val_components,
+    save_path='./results'
+)
+# Saves to: ./results/loss_history.png
+```
+
+**Includes 6 subplots:**
+1. Total loss (train & val) with best model marker
+2. Relative Lp loss component
+3. Temporal consistency component
+4. Ratio of temporal/relative loss
+5. Log-scale total loss
+6. Stacked area plot showing component contributions
+
+### 3. Loss Weights Evolution
+
+```python
+from loss import plot_loss_weights_evolution
+
+plot_loss_weights_evolution(
+    loss_weights_history=weights_history,
+    save_path='./results'
+)
+# Saves to: ./results/loss_weights_history.png
+```
+
+</details>
+
+<details>
+<summary><b>⚙️ Parameters & Configuration (Click to expand)</b></summary>
+
+### Loss Constructor Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `d` | int | 2 | Spatial dimension |
+| `p` | int | 2 | Order of Lp norm (2 = L2/Euclidean norm) |
+| `alpha_temporal` | float | 0.5 | Weight for temporal consistency loss |
+| `learnable` | bool | False | Whether loss weights are learnable parameters |
+
+### Input Tensor Shapes
+
+The loss functions accept flexible input shapes:
+
+- **Spatiotemporal**: `[B, T, n_vars, H, W]` - Full spatiotemporal data
+- **Spatial only**: `[B, n_vars, H, W]` - Single timestep (temporal loss = 0)
+- **Generic**: `[B, ...]` - Any shape with batch dimension first
+
+</details>
+
+---
 
 ## Quick Start
 
@@ -151,98 +340,6 @@ The module expects data in the following format:
 }
 ```
 
-### Example Data Loading
-
-```python
-from load_data import load_data, parse_args
-
-args = parse_args()
-train_loader, val_loader, full_data = load_data(args)
-```
-
-## Features
-
-### 1. Flexible Autoregressive Framework
-
-The `AutoregressiveBase` class provides:
-- Temporal encoding via 3D convolutions
-- Multi-step prediction support
-- Teacher forcing during training
-- Pure inference without teacher forcing
-
-### 2. Advanced Loss Function
-
-The `Loss` module combines:
-- **Relative Lp Loss**: Normalizes by target magnitude
-- **Temporal Consistency Loss**: Penalizes inconsistent temporal derivatives
-- **Learnable Weights**: Optional automatic loss weight balancing
-
-### 3. Checkpoint Management
-
-Automatic checkpoint loading and saving:
-- Saves best model based on validation loss
-- Stores optimizer and scheduler states
-- Preserves normalization statistics
-- Tracks training history
-
-### 4. Comprehensive Visualization
-
-- Prediction GIFs for qualitative assessment
-- Loss component tracking
-- Long-term prediction rollout
-- Error evolution plots
-
-## Advanced Usage
-
-### Custom Spatial Models
-
-Extend `AutoregressiveBase` to use custom spatial models:
-
-```python
-import AutoregressiveBase
-
-class AutoregressiveCustom(AutoregressiveBase):
-    def __init__(self, custom_model, **kwargs):
-        super().__init__(n_vars=custom_model.n_vars, **kwargs)
-        self.custom_model = custom_model
-    
-    def _spatial_forward(self, x, grid=None):
-        # Implement your spatial processing
-        return self.custom_model(x, grid)
-```
-
-### Learnable Loss Weights
-
-Enable automatic loss weight learning:
-
-```python
-loss_fn = Loss(
-    d=2,
-    p=2,
-    alpha_temporal=0.5,
-    learnable=True  # Enable learnable weights
-)
-
-# Include loss parameters in optimizer
-optimizer = torch.optim.Adam(
-    list(model.parameters()) + list(loss_fn.parameters()),
-    lr=1e-3
-)
-```
-
-### Multi-step Prediction
-
-Configure the model for multi-step prediction:
-
-```python
-model = AutoregressiveFNO(
-    fno_model=fno,
-    t_in=10,
-    t_out=20,      # Predict 20 steps
-    step_size=5,   # Predict 5 steps at once
-    teacher_forcing_ratio=0.5
-)
-```
 
 ## Output Structure
 
@@ -267,34 +364,3 @@ results/
     │   └── prediction_*.gif
     └── config.txt
 ```
-
-## Best Practices
-
-1. **Start with teacher forcing**: Use high initial teacher forcing ratio (0.9-1.0)
-2. **Gradually reduce**: Schedule teacher forcing reduction over training
-3. **Monitor loss components**: Watch relative Lp vs temporal consistency
-4. **Validate frequently**: Check validation performance every 10-20 epochs
-5. **Use gradient clipping**: Prevent exploding gradients (clip at 1.0)
-6. **Normalize data**: Compute and use dataset statistics
-7. **Save checkpoints**: Enable automatic checkpoint saving
-
-## Troubleshooting
-
-### Training instability
-- Reduce learning rate
-- Increase gradient clipping
-- Adjust teacher forcing schedule
-- Check data normalization
-
-### Poor long-term predictions
-- Increase `t_in` (more context)
-- Reduce `step_size` (finer predictions)
-- Tune `alpha_temporal` (temporal consistency)
-- Use teacher forcing longer
-
-### Memory issues
-- Reduce `batch_size`
-- Reduce `hidden_channels`
-- Reduce `n_layers`
-- Use gradient checkpointing
-
