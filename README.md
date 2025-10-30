@@ -406,33 +406,3 @@ results/
     │   └── prediction_*.gif
     └── config.txt
 ```
-
-## Best Practices
-
-1. **Start with teacher forcing**: Use high initial teacher forcing ratio (0.9-1.0)
-2. **Gradually reduce**: Schedule teacher forcing reduction over training
-3. **Monitor loss components**: Watch relative Lp vs temporal consistency
-4. **Validate frequently**: Check validation performance every 10-20 epochs
-5. **Use gradient clipping**: Prevent exploding gradients (clip at 1.0)
-6. **Normalize data**: Compute and use dataset statistics
-7. **Save checkpoints**: Enable automatic checkpoint saving
-
-## Troubleshooting
-
-### Training instability
-- Reduce learning rate
-- Increase gradient clipping
-- Adjust teacher forcing schedule
-- Check data normalization
-
-### Poor long-term predictions
-- Increase `t_in` (more context)
-- Reduce `step_size` (finer predictions)
-- Tune `alpha_temporal` (temporal consistency)
-- Use teacher forcing longer
-
-### Memory issues
-- Reduce `batch_size`
-- Reduce `hidden_channels`
-- Reduce `n_layers`
-- Use gradient checkpointing
