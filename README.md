@@ -36,7 +36,9 @@ The loss module combines two key components for spatiotemporal prediction accura
 
 ### Total Loss
 
-$$\mathcal{L}_{\text{total}} = w_1 \cdot \mathcal{L}_{\text{relative}} + w_2 \cdot \mathcal{L}_{\text{temporal}}$$
+$$
+\mathcal{L}_{\text{total}} = w_1 \cdot \mathcal{L}_{\text{relative}} + w_2 \cdot \mathcal{L}_{\text{temporal}}
+$$
 
 ### 1. Relative $L^p$ Loss
 
