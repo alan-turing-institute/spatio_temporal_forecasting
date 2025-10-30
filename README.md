@@ -43,9 +43,7 @@ The loss module combines two key components for spatiotemporal prediction accura
 
 Measures the relative error between predictions and targets in $L^p$ norm:
 
-$
-\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon}
-$
+![Total Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon})
 
 **Where:**
 - $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
