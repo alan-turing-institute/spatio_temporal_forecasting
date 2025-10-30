@@ -214,39 +214,6 @@ The loss functions accept flexible input shapes:
 
 </details>
 
-<details>
-<summary><b>💡 Tips & Best Practices (Click to expand)</b></summary>
-
-### Design Considerations
-
-**Why Relative Loss?**
-- Provides scale-invariance across variables with different magnitudes
-- Essential for multi-variable predictions (e.g., temperature, pressure, velocity)
-- Enables fair comparison across different physical quantities
-
-**Why Temporal Consistency?**
-- Prevents unphysical temporal oscillations
-- Enforces smooth evolution (important for PDEs)
-- Improves long-term rollout stability
-- Maintains physical realism in predictions
-
-### Hyperparameter Tuning
-
-1. **Starting `alpha_temporal`**: Begin with 0.5, adjust based on validation performance
-2. **Learnable weights**: Use smaller learning rate (0.01-0.001) for loss parameters
-3. **Long rollouts**: Increase `alpha_temporal` for longer prediction horizons
-4. **Unstable training**: If temporal loss dominates, reduce `alpha_temporal`
-
-### Common Issues
-
-| Issue | Possible Cause | Solution |
-|-------|----------------|----------|
-| Temporal loss → 0 | Weight too small | Increase `alpha_temporal` |
-| Unstable predictions | Temporal loss too dominant | Decrease `alpha_temporal` |
-| Oscillating predictions | Insufficient temporal regularization | Increase `alpha_temporal` |
-
-</details>
-
 ---
 
 ## Quick Start
