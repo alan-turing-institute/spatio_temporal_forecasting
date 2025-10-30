@@ -61,7 +61,7 @@ $$\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}
 
 Penalizes inconsistent temporal derivatives between consecutive timesteps:
 
-$$\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}$$
+$\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}$
 
 **Where:**
 - $\Delta\text{pred}_{i,t} = \text{pred}_{i,t+1} - \text{pred}_{i,t}$ (temporal finite differences)
@@ -80,8 +80,9 @@ Two modes for weight configuration:
 
 #### Fixed Weights (default: `learnable=False`)
 
-$$w_1 = 1.0 \quad \text{(fixed)}$$
-$$w_2 = \alpha_{\text{temporal}} \quad \text{(default: 0.5, user-specified)}$$
+$w_1 = 1.0 \quad \text{(fixed)}$
+
+$w_2 = \alpha_{\text{temporal}} \quad \text{(default: 0.5, user-specified)}$
 
 #### Learnable Weights (`learnable=True`)
 
