@@ -382,15 +382,6 @@ The module expects data in the following format:
 }
 ```
 
-### Example Data Loading
-
-```python
-from load_data import load_data, parse_args
-
-args = parse_args()
-train_loader, val_loader, full_data = load_data(args)
-```
-
 
 ## Output Structure
 
