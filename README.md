@@ -43,7 +43,7 @@ The loss module combines two key components for spatiotemporal prediction accura
 
 Measures the relative error between predictions and targets in $L^p$ norm:
 
-![Total Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{relative}} = \frac{1}{B} \sum_{i=1}^{B} \frac{\|\text{pred}_i - \text{target}_i\|_p}{\|\text{target}_i\|_p + \epsilon})
+![Relative Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{relative}}=\frac{1}{B}\sum_{i=1}^{B}\frac{\|\text{pred}_i-\text{target}_i\|_p}{\|\text{target}_i\|_p+\epsilon})
 
 **Where:**
 - $\text{pred}$: Predicted tensor $[B, T, n_{\text{vars}}, H, W]$ or $[B, \ldots]$
@@ -62,16 +62,14 @@ Measures the relative error between predictions and targets in $L^p$ norm:
 
 Penalizes inconsistent temporal derivatives between consecutive timesteps:
 
-$
-\mathcal{L}_{\text{temporal}} = \frac{1}{B(T-1)} \sum_{i=1}^{B} \sum_{t=1}^{T-1} \frac{\|\Delta\text{pred}_{i,t} - \Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p + \epsilon}
-$
+![Temporal Loss](https://latex.codecogs.com/svg.latex?\Large\mathcal{L}_{\text{temporal}}=\frac{1}{B(T-1)}\sum_{i=1}^{B}\sum_{t=1}^{T-1}\frac{\|\Delta\text{pred}_{i,t}-\Delta\text{target}_{i,t}\|_p}{\|\Delta\text{target}_{i,t}\|_p+\epsilon})
 
 **Where:**
-- $\Delta\text{pred}_{i,t} = \text{pred}_{i,t+1} - \text{pred}_{i,t}$ (temporal finite differences)
-- $\Delta\text{target}_{i,t} = \text{target}_{i,t+1} - \text{target}_{i,t}$
-- $T$: Number of timesteps
+- ![Delta pred](https://latex.codecogs.com/svg.latex?\Delta\text{pred}_{i,t}=\text{pred}_{i,t+1}-\text{pred}_{i,t}) (temporal finite differences)
+- ![Delta target](https://latex.codecogs.com/svg.latex?\Delta\text{target}_{i,t}=\text{target}_{i,t+1}-\text{target}_{i,t})
+- ![T](https://latex.codecogs.com/svg.latex?T): Number of timesteps
 - Returns 0 if only 1 timestep present
-
+  
 **Properties:**
 - Enforces smooth temporal evolution
 - Helps maintain physical consistency over time
@@ -139,18 +137,6 @@ optimizer = torch.optim.Adam([
     {'params': model.parameters()},
     {'params': criterion.parameters(), 'lr': 0.01}
 ])
-```
-
-### Monitoring Loss Components
-
-```python
-# Get individual loss components for logging
-components = criterion.get_loss_components(pred, target)
-
-print(f"Relative Lp Loss: {components['relative_lp']:.6f}")
-print(f"Temporal Loss: {components['temporal_consistency']:.6f}")
-print(f"Weight (Relative): {components['weight_rel']:.6f}")
-print(f"Weight (Temporal): {components['weight_temp']:.6f}")
 ```
 
 </details>
